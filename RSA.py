@@ -8,10 +8,14 @@ def generate_public_key (num_bits):
     i = 0
     while len(ar) < 2:
         i += 1
-        num = random.getrandbits(num_bits)
+        num = random.getrandbits(int(num_bits/2))
+        if (num%2==0):
+            continue
         fpt = SS_primality(num, 5)
         if fpt:
             ar.append(num)
+            print("Primes: {}/2 (count = {})".format(len(ar), i) )
+
 
     p = ar[0]
     q = ar[1]
@@ -20,7 +24,6 @@ def generate_public_key (num_bits):
     e = get_random_coprime (phi_n)
 
     d = modinv(e, phi_n)
-    # print(e, phi_n, d)
 
     return n, e, d
 
@@ -61,19 +64,17 @@ def modular_exp (a, x, m):
 def SS_single_primality (n, a):
     if a <= 1 or a >= n-1:
         raise Exception("Invalid value of a")
+
     if math.gcd(a, n) != 1:
-        # print("A")
         return False
 
     eu = modular_exp (a, int((n-1)//2), n)
     if eu != 1 and eu != n-1:
-        # print("B")
         return False
 
     jac = jac2(a, n)
 
     if jac % n != eu:
-        # print("C")
         return False
 
     return True
@@ -112,16 +113,6 @@ def str_to_ascii(str):
     return [ord(c) for c in str]
 
 
-# print(SS_primality(171424828496904907443952456616018360467868529363671755984187360030210677848706583927997885120919935350336610851429951495185293260866942640292575031085488461453718404764797919247112357921076234563660516650063210932496325210299421741785404703569069054478785342946614697847055005333761582696434628547499577456893, 50))
-#
-# print("---")
-#
-# a = 11974210996840806680435443068402451770602156406704452044825634210662326861932463119592310392269051388285581404285089487154765291175104285889137301707147437202661621311924785574623584730009130290368272926580025764039382097461460477316218919306238819962950241625643257110222820774966110620409660144189875152707
-# n = 40039545748783331279163062941531462006638565672722268800153468920915478412465033451942497820462007050213688069953171041013571440623817499542813968152349109839769214999043711066176997207100291483595492437310539006037030219943186613121226685014864252335257624175497703857719000410372454213220379468678395331686
-#
-# print(jac2(a, n))
-
-
 print ("---------------------------")
 
 b = True
@@ -151,11 +142,8 @@ while b:
 
         message = [content[i] for i in range(1, len(content))]
 
-        # for line in message:
-        #     if line == '':
-        #         message.remove(line)
-
         print(message)
+        print(len(message))
         nums = []
         for line in message:
             num = str_to_ascii(line)
@@ -194,8 +182,6 @@ while b:
             for i in range(len(nums)):
                 nums[i] = int(nums[i])
                 nums[i] = modular_exp(nums[i], d, n)
-
-            # print(nums)
 
             tx = "0x"
             for el in nums:
